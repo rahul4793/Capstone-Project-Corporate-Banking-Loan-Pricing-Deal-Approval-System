@@ -1,0 +1,29 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: deal-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./deal-pipeline-backend
+    container_name: deal-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/dealpipeline
+
+  frontend:
+    build: ./deal-pipeline-frontend
+    container_name: deal-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

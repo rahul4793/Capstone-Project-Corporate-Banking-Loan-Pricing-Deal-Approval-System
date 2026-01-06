@@ -1,0 +1,24 @@
+package com.investmentbank.deal_pipeline_backend.model;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
+
+@Data
+@Document(collection = "users")
+public class User {
+
+    @Id
+    private String id;
+
+    private String username;
+    private String email;
+    private String password;
+
+    private Role role;        // ADMIN / USER
+    private boolean active = true;
+
+    private Instant createdAt = Instant.now();
+}
