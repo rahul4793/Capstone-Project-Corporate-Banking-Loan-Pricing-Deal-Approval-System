@@ -140,64 +140,84 @@
 
 //new2
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    AWS_REGION = "ap-south-1"
-    ACCOUNT_ID = "308855860105"
-    ECR_REPO = "backend-app"
-    IMAGE_TAG = "latest"
-  }
-
-  stages {
-
-    stage('Checkout') {
-      steps {
-        git branch: 'main',
-            url: 'https://github.com/rahul4793/Capstone-Project-Corporate-Banking-Loan-Pricing-Deal-Approval-System.git'
-      }
+    environment {
+        AWS_REGION = "ap-south-1"
+        ACCOUNT_ID = "308855860105"
+        ECR_REPO = "backend-app"
+        IMAGE_TAG = "latest"
+        CONTAINER_NAME = "backend"
+        HOST_PORT = "5000"
+        CONTAINER_PORT = "5000"
     }
 
-    stage('Build Image') {
-      steps {
-        dir('Corporate_Banking_Backend') {
-          sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/rahul4793/Capstone-Project-Corporate-Banking-Loan-Pricing-Deal-Approval-System.git'
+            }
         }
-      }
-    }
 
-    stage('Login ECR') {
-      steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds']]) {
-          sh '''
-          aws ecr get-login-password --region $AWS_REGION \
-          | docker login --username AWS --password-stdin \
-          $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-          '''
+        stage('Build Docker Image') {
+            steps {
+                dir('Corporate_Banking_Backend') {
+                    sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
+                }
+            }
         }
-      }
+
+        stage('Login to ECR') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    sh '''
+                    aws ecr get-login-password --region $AWS_REGION \
+                    | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image to ECR') {
+            steps {
+                sh '''
+                docker tag $ECR_REPO:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Deploy Backend') {
+            steps {
+                sh '''
+                # Stop and remove existing container if it exists
+                if [ $(docker ps -a -q -f name=$CONTAINER_NAME) ]; then
+                    docker stop $CONTAINER_NAME
+                    docker rm $CONTAINER_NAME
+                fi
+
+                # Kill any process using port
+                PORT_PID=$(lsof -ti:$HOST_PORT)
+                if [ "$PORT_PID" ]; then
+                    kill -9 $PORT_PID
+                fi
+
+                # Run new container
+                docker run -d -p $HOST_PORT:$CONTAINER_PORT --name $CONTAINER_NAME $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
     }
 
-    stage('Push Image') {
-      steps {
-        sh '''
-        docker tag $ECR_REPO:$IMAGE_TAG \
-        $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-
-        docker push \
-        $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-        '''
-      }
-    }
-
-stage('Deploy') {
-    steps {
-        sh 'chmod +x ./deploy.sh'
-        sh './deploy.sh'
+    post {
+        success {
+            echo "✅ Backend deployed successfully on port $HOST_PORT"
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs above for details."
+        }
     }
 }
-
-  }
-}
-
