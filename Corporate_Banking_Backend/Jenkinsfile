@@ -194,9 +194,8 @@ stage('Deploy Backend') {
         script {
             def CONTAINER_NAME = "backend"
             def HOST_PORT = "5000"
-            def CONTAINER_PORT = "5000"
 
-            // Stop and remove existing containers
+            // Stop and remove existing container
             sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker stop"
             sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker rm"
 
@@ -210,7 +209,7 @@ stage('Deploy Backend') {
             """
 
             // Run the new container
-            sh "docker run -d -p ${HOST_PORT}:${CONTAINER_PORT} --name ${CONTAINER_NAME} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+            sh "docker run -d -p ${HOST_PORT}:${HOST_PORT} --name ${CONTAINER_NAME} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
         }
     }
 }
