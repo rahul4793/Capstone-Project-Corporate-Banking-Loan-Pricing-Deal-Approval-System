@@ -67,6 +67,78 @@
 //     }
 //   }
 // }
+
+
+///new
+// pipeline {
+//   agent any
+
+//   environment {
+//     AWS_REGION = "ap-south-1"
+//     ACCOUNT_ID = "308855860105"
+//     ECR_REPO = "backend-app"
+//     IMAGE_TAG = "latest"
+//   }
+
+//   stages {
+
+//     stage('Checkout') {
+//       steps {
+//         git branch: 'main',
+//         url: 'https://github.com/rahul4793/Capstone-Project-Corporate-Banking-Loan-Pricing-Deal-Approval-System.git'
+//       }
+//     }
+
+//     stage('Build Image') {
+//       steps {
+//         dir('Corporate_Banking_Backend') {
+//           sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+//         }
+//       }
+//     }
+
+//     stage('Login ECR') {
+//       steps {
+//         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+//                           credentialsId: 'aws-creds']]) {
+//           sh '''
+//           aws ecr get-login-password --region $AWS_REGION \
+//           | docker login --username AWS --password-stdin \
+//           $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+//           '''
+//         }
+//       }
+//     }
+
+//     stage('Push Image') {
+//       steps {
+//         sh '''
+//         docker tag $ECR_REPO:$IMAGE_TAG \
+//         $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+//         docker push \
+//         $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+//         '''
+//       }
+//     }
+
+//     stage('Deploy') {
+//       steps {
+//         sh '''
+//         docker stop backend || true
+//         docker rm backend || true
+
+//         docker run -d -p 5000:5000 \
+//         --name backend \
+//         $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+//         '''
+//       }
+//     }
+//   }
+// }
+
+
+//new2
 pipeline {
   agent any
 
@@ -82,7 +154,7 @@ pipeline {
     stage('Checkout') {
       steps {
         git branch: 'main',
-        url: 'https://github.com/rahul4793/Capstone-Project-Corporate-Banking-Loan-Pricing-Deal-Approval-System.git'
+            url: 'https://github.com/rahul4793/Capstone-Project-Corporate-Banking-Loan-Pricing-Deal-Approval-System.git'
       }
     }
 
@@ -122,14 +194,11 @@ pipeline {
     stage('Deploy') {
       steps {
         sh '''
-        docker stop backend || true
-        docker rm backend || true
-
-        docker run -d -p 5000:5000 \
-        --name backend \
-        $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+        cd /home/ec2-user
+        ./deploy.sh
         '''
       }
     }
   }
 }
+
