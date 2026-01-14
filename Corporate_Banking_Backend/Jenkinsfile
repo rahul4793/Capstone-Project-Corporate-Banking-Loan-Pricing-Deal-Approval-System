@@ -190,25 +190,25 @@ pipeline {
         }
 
         stage('Deploy Backend') {
-            steps {
-                sh '''
-                # Stop and remove existing container if it exists
-                if [ $(docker ps -a -q -f name=$CONTAINER_NAME) ]; then
-                    docker stop $CONTAINER_NAME
-                    docker rm $CONTAINER_NAME
-                fi
+    steps {
+        sh '''
+        # Stop and remove existing container if it exists
+        if [ $(docker ps -a -q -f name=$CONTAINER_NAME) ]; then
+            docker stop $CONTAINER_NAME
+            docker rm $CONTAINER_NAME
+        fi
 
-                # Kill any process using port
-                PORT_PID=$(lsof -ti:$HOST_PORT)
-                if [ "$PORT_PID" ]; then
-                    kill -9 $PORT_PID
-                fi
+        # Kill any process using the port
+        PORT_PID=$(lsof -ti:$HOST_PORT)
+        if [ -n "$PORT_PID" ]; then
+            kill -9 $PORT_PID
+        fi
 
-                # Run new container
-                docker run -d -p $HOST_PORT:$CONTAINER_PORT --name $CONTAINER_NAME $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                '''
-            }
-        }
+        # Run new container
+        docker run -d -p $HOST_PORT:$CONTAINER_PORT --name $CONTAINER_NAME $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+        '''
+    }
+}
 
     }
 
