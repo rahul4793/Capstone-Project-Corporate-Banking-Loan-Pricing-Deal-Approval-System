@@ -79,5 +79,6 @@ public class AdminController {
         user.setActive(request.isActive());
         userRepository.save(user);
         //comment added
+        //jenkins added
     }
 }
