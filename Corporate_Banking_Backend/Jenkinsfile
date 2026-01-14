@@ -192,28 +192,33 @@ pipeline {
 stage('Deploy Backend') {
     steps {
         script {
-            def CONTAINER_NAME = "backend"
-            def HOST_PORT = "5000"
+            echo "🚀 Starting deployment..."
 
             // Stop and remove existing container
-            sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker stop"
-            sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker rm"
+            echo "🔹 Stopping existing container (if any)..."
+            sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker stop || true"
+            sh "docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker rm || true"
 
             // Kill any process using the port
+            echo "🔹 Checking if port ${HOST_PORT} is in use..."
             sh """
-            PORT_PID=\$(lsof -ti:${HOST_PORT})
-            if [ -n "\$PORT_PID" ]; then
-                echo "Killing process on port ${HOST_PORT}: \$PORT_PID"
+            PORT_PID=\$(lsof -ti:${HOST_PORT} || true)
+            echo "PORT_PID: \$PORT_PID"
+            if [ ! -z "\$PORT_PID" ]; then
+                echo "⚠️ Killing process on port ${HOST_PORT}: \$PORT_PID"
                 kill -9 \$PORT_PID
+            else
+                echo "✅ Port ${HOST_PORT} is free"
             fi
             """
 
             // Run the new container
+            echo "🔹 Running new container..."
             sh "docker run -d -p ${HOST_PORT}:${HOST_PORT} --name ${CONTAINER_NAME} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+            echo "✅ Deployment command executed"
         }
     }
 }
-
 
     }
 
