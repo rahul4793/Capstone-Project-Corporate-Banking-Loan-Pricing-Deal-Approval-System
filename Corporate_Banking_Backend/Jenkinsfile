@@ -161,13 +161,17 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                dir('Corporate_Banking_Backend') {
-                    sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
-                }
-            }
+stage('Build Docker Image') {
+    steps {
+        dir('Corporate_Banking_Backend') {
+            sh '''
+            set -x
+            docker build -t $ECR_REPO:$IMAGE_TAG .
+            docker images | grep $ECR_REPO
+            '''
         }
+    }
+}
 
         stage('Login to ECR') {
             steps {
@@ -180,14 +184,28 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to ECR') {
-            steps {
-                sh '''
-                docker tag $ECR_REPO:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                '''
-            }
+stage('Push Docker Image to ECR') {
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+            sh '''
+            set -x  # 🔹 Enable debug output
+
+            echo "🔹 Logging in to ECR..."
+            aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+            echo "🔹 Checking local images..."
+            docker images | grep $ECR_REPO
+
+            echo "🔹 Tagging image..."
+            docker tag $ECR_REPO:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+            echo "🔹 Pushing image to ECR..."
+            docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+            '''
         }
+    }
+}
 
 stage('Deploy Backend') {
     steps {
