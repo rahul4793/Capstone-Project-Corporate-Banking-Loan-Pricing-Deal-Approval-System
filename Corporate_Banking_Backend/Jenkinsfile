@@ -191,14 +191,12 @@ pipeline {
       }
     }
 
-    stage('Deploy') {
-      steps {
-        sh '''
-        cd /home/ec2-user
-        ./deploy.sh
-        '''
-      }
+stage('Deploy') {
+    steps {
+        sh './deploy.sh'
     }
+}
+
   }
 }
 
