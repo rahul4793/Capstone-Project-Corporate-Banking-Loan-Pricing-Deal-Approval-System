@@ -11,7 +11,7 @@ services:
     build: ./deal-pipeline-backend
     container_name: deal-backend
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       - mongo
     environment:
