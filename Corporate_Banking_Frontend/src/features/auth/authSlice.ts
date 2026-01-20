@@ -26,7 +26,9 @@ export const loginUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const res = await axiosInstance.post("/api/auth/login", data);
+      // const res = await axiosInstance.post("/api/auth/login", data);
+            const res = await axiosInstance.post("/auth/login", data);
+
       return res.data; // must contain token, username, role
     } catch {
       return rejectWithValue("Invalid username or password");
