@@ -26,7 +26,9 @@ COPY . .
 
 
 # 🔴 ENSURE prod env is used
-ENV VITE_API_BASE_URL=http://3.7.254.140:5000
+# ENV VITE_API_BASE_URL=http://3.7.254.140:5000
+ENV VITE_API_BASE_URL=/api
+
 
 RUN npm run build
 
