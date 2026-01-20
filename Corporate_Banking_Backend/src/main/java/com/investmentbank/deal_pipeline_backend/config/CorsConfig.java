@@ -17,7 +17,9 @@ public class CorsConfig {
 
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of("http://localhost:5173", // local dev
-                                        "http://localhost:3000"  // docker frontend
+                                        "http://localhost:3000" , // docker frontend
+                                         "http://3.7.254.140"  ,   // live frontend on EC2
+                                          "http://3.7.254.140:5000" // live frontend with port
                                 ));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
