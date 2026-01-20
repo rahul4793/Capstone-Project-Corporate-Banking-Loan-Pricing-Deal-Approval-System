@@ -149,7 +149,7 @@ pipeline {
         IMAGE_TAG = "latest"
         CONTAINER_NAME = "backend"
         HOST_PORT = "5000"
-        CONTAINER_PORT = "5000"
+        CONTAINER_PORT = "8081"
     }
 
     stages {
