@@ -22,6 +22,12 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+
+
+# 🔴 ENSURE prod env is used
+ENV VITE_API_BASE_URL=http://3.7.254.140:5000
+
 RUN npm run build
 
 # Production stage
