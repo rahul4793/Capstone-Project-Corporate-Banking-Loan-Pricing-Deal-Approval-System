@@ -41,8 +41,10 @@ public class SecurityConfig {
                 )
 
                 //JWT filter
-                .addFilterBefore(jwtFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(httpBasic -> httpBasic.disable())   // 🔴 IMPORTANT
+                .formLogin(form -> form.disable());            // 🔴 IMPORTANT
+
 
         return http.build();
     }
