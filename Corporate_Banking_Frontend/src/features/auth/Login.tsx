@@ -80,7 +80,7 @@ export default function Login() {
     >
       <Paper elevation={4} sx={{ width: 400, p: 4 }}>
         <Typography variant="h5" align="center" gutterBottom>
-          Deal Pipeline Portal
+          Rahul Deal Pipeline Portal
         </Typography>
 
         <Typography
