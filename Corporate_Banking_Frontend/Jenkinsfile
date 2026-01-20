@@ -21,16 +21,28 @@ pipeline {
             }
         }
 
+        // stage('Build Docker Image') {
+        //     steps {
+        //         echo "🔹 Building Docker image..."
+        //         dir('Corporate_Banking_Frontend') {
+        //             sh """
+        //             docker build --no-cache -t $ECR_REPO:$IMAGE_TAG .
+        //             """
+        //         }
+        //     }
+        // }
         stage('Build Docker Image') {
-            steps {
-                echo "🔹 Building Docker image..."
-                dir('Corporate_Banking_Frontend') {
-                    sh """
-                    docker build -t $ECR_REPO:$IMAGE_TAG .
-                    """
-                }
-            }
+    steps {
+        echo "🔹 Building Docker image (NO CACHE)..."
+        dir('Corporate_Banking_Frontend') {
+            sh '''
+            docker build --no-cache -t frontend-app:latest .
+            docker images | grep frontend-app
+            '''
         }
+    }
+}
+
 
         stage('Login to ECR') {
             steps {
@@ -67,10 +79,14 @@ stage('Deploy Frontend') {
             docker ps -a -q -f name=${CONTAINER_NAME} | xargs -r docker rm
 
             echo "Running new frontend container"
-            docker run -d \
-              -p ${HOST_PORT}:80 \
-              --name ${CONTAINER_NAME} \
-              ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+
+docker run -d \
+  --restart always \
+  -p ${HOST_PORT}:80 \
+  --name ${CONTAINER_NAME} \
+  ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+
             """
         }
     }
