@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
     // baseURL: import.meta.env.VITE_API_BASE_URL
       // baseURL: "/",
         // baseURL: "http://3.7.254.140/api",
-        baseURL: "/api"
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 
 });
 
