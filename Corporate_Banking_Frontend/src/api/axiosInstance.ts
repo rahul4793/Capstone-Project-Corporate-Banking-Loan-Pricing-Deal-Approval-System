@@ -3,7 +3,9 @@ import axios from "axios";
 const axiosInstance = axios.create({
   // baseURL: "http://localhost:8080",
     // baseURL: "http://3.7.254.140:5000",
-    baseURL: import.meta.env.VITE_API_BASE_URL
+    // baseURL: import.meta.env.VITE_API_BASE_URL
+      baseURL: "/api",
+
 
 });
 
